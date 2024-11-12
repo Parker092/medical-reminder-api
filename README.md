@@ -97,6 +97,5 @@ Este proyecto está bajo la licencia MIT. Consulta el archivo `LICENSE` para má
 
 ## Contacto
 Si tienes preguntas o sugerencias, no dudes en contactarme:
-- **Email**: tu-email@ejemplo.com
-- **GitHub**: [tu-usuario](https://github.com/tu-usuario)
+- **Email**: diego.palacios2@catolica.edu.sv
 
