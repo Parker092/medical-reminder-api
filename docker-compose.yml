@@ -1,0 +1,38 @@
+services:
+  mongo:
+    image: mongo:latest
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: medical_reminders_db
+    volumes:
+      - mongo_data:/data/db  # Persistencia de datos para MongoDB
+    networks:
+      - app-network
+
+  api:
+    build: .
+    container_name: medical-reminder-api
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/medical_reminders_db
+      - JWT_SECRET=5f0e3355250a8af2a29635a9484fa75d0cc7ae8b32e6f66f236d9f76e30e4ed1
+      - PORT=5002
+    ports:
+      - "5002:5002"
+    depends_on:
+      - mongo
+    volumes:
+      - .:/app
+      - /app/node_modules
+    networks:
+      - app-network
+    command: "nodemon app.js"
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mongo_data:
+    driver: local
