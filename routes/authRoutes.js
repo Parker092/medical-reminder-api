@@ -1,6 +1,8 @@
 // Archivo: routes/authRoutes.js
 const express = require('express');
 const { registerUser, loginUser } = require('../controllers/authController');
+const { body } = require('express-validator');
+
 /**
  * @swagger
  * tags:
@@ -31,7 +33,7 @@ const { registerUser, loginUser } = require('../controllers/authController');
  *                 enum: [doctor, patient]
  *               dui:
  *                 type: string
- *                 pattern: "^\\d{8}-\\d$"
+ *                 pattern: "^\d{8}-\d$"
  *     responses:
  *       201:
  *         description: Usuario registrado correctamente
@@ -68,9 +70,26 @@ const { registerUser, loginUser } = require('../controllers/authController');
 const router = express.Router();
 
 // Ruta para registrar un usuario (médico o paciente)
-router.post('/register', registerUser);
+router.post(
+    '/register',
+    [
+        body('name').notEmpty().withMessage('El nombre es obligatorio'),
+        body('email').isEmail().withMessage('Debe proporcionar un email válido'),
+        body('password').isLength({ min: 6 }).withMessage('La contraseña debe tener al menos 6 caracteres'),
+        body('role').isIn(['doctor', 'patient']).withMessage('El rol debe ser doctor o patient'),
+        body('dui').matches(/\d{8}-\d/).withMessage('Debe proporcionar un DUI válido (formato: ########-#)'),
+    ],
+    registerUser
+);
 
 // Ruta para iniciar sesión
-router.post('/login', loginUser);
+router.post(
+    '/login',
+    [
+        body('email').isEmail().withMessage('Debe proporcionar un email válido'),
+        body('password').isLength({ min: 6 }).withMessage('La contraseña debe tener al menos 6 caracteres'),
+    ],
+    loginUser
+);
 
 module.exports = router;

@@ -30,6 +30,11 @@ exports.getPrescriptions = async (req, res) => {
             return res.status(404).json({ message: 'Paciente no encontrado' });
         }
 
+        // Verificar si el usuario autenticado es el paciente o un médico
+        if (req.user.role !== 'patient' && req.user.role !== 'doctor') {
+            return res.status(403).json({ message: 'Acceso denegado. Solo pacientes o médicos pueden ver las recetas.' });
+        }
+
         const prescriptions = await Prescription.find({ patient: patient._id }).populate('doctor', 'name');
         res.status(200).json({ prescriptions });
     } catch (error) {
@@ -81,6 +86,12 @@ exports.getPatient = async (req, res) => {
         if (!patient) {
             return res.status(404).json({ message: 'Paciente no encontrado' });
         }
+
+        // Verificar si el usuario autenticado es el paciente o un médico
+        if (req.user.role !== 'patient' && req.user.role !== 'doctor') {
+            return res.status(403).json({ message: 'Acceso denegado. Solo pacientes o médicos pueden ver esta información.' });
+        }
+
         res.status(200).json({ patient });
     } catch (error) {
         res.status(500).json({ message: 'Error al obtener el paciente', error });
@@ -92,6 +103,11 @@ exports.updatePatient = async (req, res) => {
     try {
         const { dui } = req.params;
         const updateData = req.body;
+
+        // Verificar si el usuario autenticado es un médico
+        if (req.user.role !== 'doctor') {
+            return res.status(403).json({ message: 'Acceso denegado. Solo los médicos pueden actualizar la información de un paciente.' });
+        }
 
         // Verificar si el paciente existe por DUI
         const patient = await Patient.findOneAndUpdate({ dui }, updateData, { new: true });
@@ -108,6 +124,11 @@ exports.updatePatient = async (req, res) => {
 exports.deletePatient = async (req, res) => {
     try {
         const { dui } = req.params;
+
+        // Verificar si el usuario autenticado es un médico
+        if (req.user.role !== 'doctor') {
+            return res.status(403).json({ message: 'Acceso denegado. Solo los médicos pueden eliminar un paciente.' });
+        }
 
         // Verificar si el paciente existe por DUI
         const patient = await Patient.findOneAndDelete({ dui });

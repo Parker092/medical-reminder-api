@@ -1,6 +1,8 @@
 // Archivo: routes/notificationRoutes.js
 const express = require('express');
 const { sendNotification } = require('../controllers/notificationController');
+const { verifyToken, isDoctor } = require('../middlewares/authMiddleware');
+
 /**
  * @swagger
  * tags:
@@ -13,6 +15,8 @@ const { sendNotification } = require('../controllers/notificationController');
  *   post:
  *     summary: Enviar una notificación de recordatorio de medicamento
  *     tags: [Notifications]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -35,6 +39,6 @@ const { sendNotification } = require('../controllers/notificationController');
 const router = express.Router();
 
 // Ruta para enviar una notificación de recordatorio de medicamento
-router.post('/send', sendNotification);
+router.post('/send', verifyToken, isDoctor, sendNotification);
 
 module.exports = router;

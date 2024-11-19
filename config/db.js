@@ -1,5 +1,6 @@
 // config/db.js
 const mongoose = require('mongoose');
+require('dotenv').config(); // Agregar esta línea
 
 const connectDB = async () => {
     try {

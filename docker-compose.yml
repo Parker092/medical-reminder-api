@@ -1,9 +1,9 @@
 services:
   mongo:
     image: mongo:latest
-    container_name: mongodb
+    container_name: mongodbPF
     ports:
-      - "27017:27017"
+      - "27018:27017"
     environment:
       MONGO_INITDB_DATABASE: medical_reminders_db
     volumes:

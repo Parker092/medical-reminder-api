@@ -1,6 +1,8 @@
 // Archivo: routes/medicationConfirmationRoutes.js
 const express = require('express');
 const { confirmMedication } = require('../controllers/medicationConfirmationController');
+const { verifyToken, isPatient } = require('../middlewares/authMiddleware');
+
 /**
  * @swagger
  * tags:
@@ -13,6 +15,8 @@ const { confirmMedication } = require('../controllers/medicationConfirmationCont
  *   post:
  *     summary: Confirmar la toma de un medicamento
  *     tags: [MedicationConfirmations]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -40,6 +44,6 @@ const { confirmMedication } = require('../controllers/medicationConfirmationCont
 const router = express.Router();
 
 // Ruta para confirmar la toma de un medicamento
-router.post('/confirm', confirmMedication);
+router.post('/confirm', verifyToken, isPatient, confirmMedication);
 
 module.exports = router;

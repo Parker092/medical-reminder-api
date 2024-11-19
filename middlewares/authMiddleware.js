@@ -1,30 +1,44 @@
-// Archivo: middlewares/authMiddleware.js
+// authMiddleware.js
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
-exports.verifyToken = (req, res, next) => {
-    const token = req.header('Authorization');
-    if (!token) {
-        return res.status(401).json({ message: 'Acceso denegado. No se proporcionó un token.' });
-    }
+const verifyToken = (req, res, next) => {
+    const token = req.header('Authorization')?.split(' ')[1];
+    if (!token) return res.status(401).json({ message: 'Access Denied' });
 
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = decoded;
+        const verified = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = verified;
         next();
-    } catch (error) {
-        res.status(400).json({ message: 'Token inválido.' });
+    } catch (err) {
+        res.status(400).json({ message: 'Invalid Token' });
     }
 };
 
-exports.isDoctor = async (req, res, next) => {
+const isDoctor = async (req, res, next) => {
     try {
-        const user = await User.findOne({ dui: req.user.dui });
-        if (user.role !== 'doctor') {
-            return res.status(403).json({ message: 'Acceso denegado. No tienes permiso para realizar esta acción.' });
+        const user = await User.findById(req.user._id);
+        if (user && user.role === 'doctor') {
+            next();
+        } else {
+            res.status(403).json({ message: 'Access Forbidden: Requires Doctor Role' });
         }
-        next();
-    } catch (error) {
-        res.status(500).json({ message: 'Error al verificar el rol de usuario.', error });
+    } catch (err) {
+        res.status(500).json({ message: 'Server Error' });
     }
 };
+
+const isPatient = async (req, res, next) => {
+    try {
+        const user = await User.findById(req.user._id);
+        if (user && user.role === 'patient') {
+            next();
+        } else {
+            res.status(403).json({ message: 'Access Forbidden: Requires Patient Role' });
+        }
+    } catch (err) {
+        res.status(500).json({ message: 'Server Error' });
+    }
+};
+
+module.exports = { verifyToken, isDoctor, isPatient };
