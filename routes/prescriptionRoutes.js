@@ -38,7 +38,7 @@ router.get(
     '/:patientDui',
     verifyToken,
     [
-        param('patientDui').matches(/^\d{8}-\d$/).withMessage('Debe proporcionar un DUI válido (formato: ########-#)'),
+        param('patientDui').matches(/^\\d{8}-\\d$/).withMessage('Debe proporcionar un DUI válido (formato: ########-#)'),
     ],
     getPrescriptions
 );
@@ -80,7 +80,7 @@ router.post(
     verifyToken,
     isDoctor,
     [
-        body('patientDui').matches(/^\d{8}-\d$/).withMessage('Debe proporcionar un DUI válido (formato: ########-#)'),
+        body('patientDui').matches(/^\\d{8}-\\d$/).withMessage('Debe proporcionar un DUI válido (formato: ########-#)'),
         body('medicationName').notEmpty().withMessage('El nombre del medicamento es obligatorio'),
         body('dosage').notEmpty().withMessage('La dosis es obligatoria'),
         body('frequency').notEmpty().withMessage('La frecuencia es obligatoria'),

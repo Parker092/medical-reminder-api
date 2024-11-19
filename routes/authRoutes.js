@@ -33,7 +33,7 @@ const { body } = require('express-validator');
  *                 enum: [doctor, patient]
  *               dui:
  *                 type: string
- *                 pattern: "^\d{8}-\d$"
+ *                 pattern: "/^\\d{8}-\\d$/"
  *     responses:
  *       201:
  *         description: Usuario registrado correctamente

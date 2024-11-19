@@ -1,8 +1,9 @@
 // Archivo: models/User.js
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const { Schema } = mongoose;
 
-const userSchema = new mongoose.Schema({
+const userSchema = new Schema({
     name: {
         type: String,
         required: true,
@@ -28,15 +29,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
         unique: true,
-        match: /^\d{8}-\d$/, // Validación para el formato 00000000-0
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now,
-    },
-    updatedAt: {
-        type: Date,
-        default: Date.now,
+        match: /^\\d{8}-\\d$/, // Validación para el formato 00000000-0
     },
 }, { timestamps: true });
 
@@ -48,11 +41,23 @@ userSchema.pre('save', async function (next) {
     next();
 });
 
+// Middleware para eliminar en cascada las recetas al eliminar un doctor
+userSchema.pre('remove', async function (next) {
+    if (this.role === 'doctor') {
+        try {
+            await mongoose.model('Prescription').deleteMany({ doctor: this._id });
+            next();
+        } catch (error) {
+            next(error);
+        }
+    } else {
+        next();
+    }
+});
+
 // Método para comparar contraseñas
 userSchema.methods.matchPassword = async function (enteredPassword) {
     return await bcrypt.compare(enteredPassword, this.password);
 };
 
 module.exports = mongoose.model('User', userSchema);
-
-

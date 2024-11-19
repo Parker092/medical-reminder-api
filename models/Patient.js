@@ -1,9 +1,10 @@
 // Archivo: models/Patient.js
 const mongoose = require('mongoose');
+const { Schema } = mongoose;
 
-const patientSchema = new mongoose.Schema({
+const patientSchema = new Schema({
     user: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: 'User',
         required: true,
     },
@@ -14,6 +15,7 @@ const patientSchema = new mongoose.Schema({
     },
     email: {
         type: String,
+        required: true,
         lowercase: true,
         trim: true,
     },
@@ -26,7 +28,7 @@ const patientSchema = new mongoose.Schema({
         type: String,
         required: true,
         unique: true,
-        match: /^\d{8}-\d$/, // Validación para el formato 00000000-0
+        match: /^\\d{8}-\\d$/, // Validación para el formato 00000000-0
     },
     emergencyContact: {
         name: {
@@ -40,14 +42,17 @@ const patientSchema = new mongoose.Schema({
             trim: true,
         },
     },
-    createdAt: {
-        type: Date,
-        default: Date.now,
-    },
-    updatedAt: {
-        type: Date,
-        default: Date.now,
-    },
 }, { timestamps: true });
+
+// Middleware para eliminar recetas y confirmaciones asociadas al eliminar un paciente
+patientSchema.pre('remove', async function (next) {
+    try {
+        await mongoose.model('Prescription').deleteMany({ patient: this._id });
+        await mongoose.model('MedicationConfirmation').deleteMany({ patient: this._id });
+        next();
+    } catch (error) {
+        next(error);
+    }
+});
 
 module.exports = mongoose.model('Patient', patientSchema);

@@ -1,14 +1,15 @@
 // Archivo: models/Prescription.js
 const mongoose = require('mongoose');
+const { Schema } = mongoose;
 
-const prescriptionSchema = new mongoose.Schema({
+const prescriptionSchema = new Schema({
     patient: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: 'Patient',
         required: true,
     },
     doctor: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: 'User',
         required: true,
     },
@@ -36,14 +37,16 @@ const prescriptionSchema = new mongoose.Schema({
         type: String,
         trim: true,
     },
-    createdAt: {
-        type: Date,
-        default: Date.now,
-    },
-    updatedAt: {
-        type: Date,
-        default: Date.now,
-    },
 }, { timestamps: true });
+
+// Middleware para eliminar confirmaciones asociadas al eliminar una receta
+prescriptionSchema.pre('remove', async function (next) {
+    try {
+        await mongoose.model('MedicationConfirmation').deleteMany({ prescription: this._id });
+        next();
+    } catch (error) {
+        next(error);
+    }
+});
 
 module.exports = mongoose.model('Prescription', prescriptionSchema);
